@@ -35,7 +35,7 @@ def load_data(directory, cache_directory, memory, train_perc, val_perc, device, 
     for f in tqdm(os.listdir(directory)):
         file = os.path.join(directory, f)
         df = pd.read_csv(file, sep=',', index_col=False)
-        input,output = convert_to_sequences(memory, forecast_days, newdf.to_numpy())
+        input,output = convert_to_sequences(memory, forecast_days, df.to_numpy())
         train_size = int(len(input) * train_perc);
         val_size = int(len(input) * val_perc);
         test_size = int(len(input) - train_size - val_size)

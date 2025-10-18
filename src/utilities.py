@@ -2,6 +2,7 @@ import numpy as np
 import torch
 from torch.utils.data import random_split, DataLoader
 from tqdm import tqdm
+import os
 
 def convert_to_sequences(memory, days_prediction, data_sequence):
     x = []
@@ -41,11 +42,12 @@ def load_data(directory, cache_directory, memory, train_perc, val_perc, device, 
         test_size = int(len(input) - train_size - val_size)
         train_input_dataset_single, val_input_dataset_single, test_input_dataset_single = random_split(input, [train_size, val_size, test_size])
         train_output_dataset_single, val_output_dataset_single, test_output_dataset_single = random_split(output, [train_size, val_size, test_size])
-        train_input_dataset = np.vstack([train_input_dataset, train_input_dataset_single]) if (len(train_input_dataset) != 0) else train_input_dataset_single 
-        train_output_dataset = np.vstack([train_output_dataset, train_output_dataset_single]) if (len(train_output_dataset) != 0) else train_output_dataset_single 
-        val_input_dataset = np.vstack([val_input_dataset, val_input_dataset_single]) if (len(val_input_dataset) != 0) else val_input_dataset_single 
-        val_output_dataset = np.vstack([val_output_dataset, val_output_dataset_single]) if (len(val_output_dataset) != 0) else val_output_dataset_single 
-        test_input_dataset = np.vstack([test_input_dataset, test_input_dataset_single]) if (len(test_input_dataset) != 0) else test_input_dataset_single 
+        print(len(train_input_dataset), len(train_input_dataset_single), f)
+        train_input_dataset = np.vstack([train_input_dataset, train_input_dataset_single]) if (len(train_input_dataset) != 0) else train_input_dataset_single
+        train_output_dataset = np.vstack([train_output_dataset, train_output_dataset_single]) if (len(train_output_dataset) != 0) else train_output_dataset_single
+        val_input_dataset = np.vstack([val_input_dataset, val_input_dataset_single]) if (len(val_input_dataset) != 0) else val_input_dataset_single
+        val_output_dataset = np.vstack([val_output_dataset, val_output_dataset_single]) if (len(val_output_dataset) != 0) else val_output_dataset_single
+        test_input_dataset = np.vstack([test_input_dataset, test_input_dataset_single]) if (len(test_input_dataset) != 0) else test_input_dataset_single
         test_output_dataset = np.vstack([test_output_dataset, test_output_dataset_single]) if (len(test_output_dataset) != 0) else test_output_dataset_single
         train_data_size = train_data_size + len(train_input_dataset)
         val_data_size = val_data_size + len(val_input_dataset)
@@ -53,7 +55,7 @@ def load_data(directory, cache_directory, memory, train_perc, val_perc, device, 
         if (train_data_size > 20000):
             print("Writing file of size ", train_data_size)
             outfile = os.path.join(cache_directory, 'preprocessed-{}.npz'.format(count))
-            np.savez_compressed(outfile, train_input=np.asarray(train_input_dataset), train_output=np.asarray(train_output_dataset), val_input=np.asarray(val_input_dataset), val_output=np.asarray(val_output_dataset), test_input=np.asarray(test_input_dataset), test_output=np.asarray(test_output_dataset)) 
+            np.savez_compressed(outfile, train_input=np.asarray(train_input_dataset), train_output=np.asarray(train_output_dataset), val_input=np.asarray(val_input_dataset), val_output=np.asarray(val_output_dataset), test_input=np.asarray(test_input_dataset), test_output=np.asarray(test_output_dataset))
             rv.append(PreProcessed(train_index_start, val_index_start, test_index_start, train_index_start + train_data_size - 1, val_index_start + val_data_size - 1, test_index_start + test_data_size - 1, train_data_size, val_data_size, test_data_size, outfile))
             train_index_start = train_index_start + train_data_size
             val_index_start = val_index_start + val_data_size

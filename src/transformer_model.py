@@ -4,7 +4,7 @@ import pytorch_lightning as pl
 
 from positional_encoder import PositionalEncoder
 
-class TransformerModel(pl.LightningModule):
+class TransformerModel(nn.Module):
     """
     PyTorch Lightning module for a generic Transformer model.
     """

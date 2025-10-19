@@ -17,26 +17,22 @@ class StockPredictor(pl.LightningModule):
         return output
 
     def training_step(self, batch, batch_idx):
-        print("Training Step", batch_idx)
         outputs, loss = self.common_step(batch, batch_idx)
         self.log('train_loss', loss)
         return loss
 
     def validation_step(self, batch, batch_idx):
-        print("Val Step", batch_idx)
         outputs, loss = self.common_step(batch, batch_idx)
         self.log('val_loss', loss)
         return loss
 
     def test_step(self, batch, batch_idx):
-        print("Test Step", batch_idx)
         outputs, loss = self.common_step(batch, batch_idx)
         self.log('test_loss', loss)
         return loss
 
     def common_step(self, batch, batch_idx):
         inputs, targets = batch
-        print('Input Shape = ', inputs.shape, ' target shape = ' , targets.shape)
         outputs = self.forward(inputs, targets)
         loss = 0
         if targets is not None:

@@ -1,7 +1,7 @@
 from torch.utils.data import Dataset
 from datasettype import DatasetType
 from preprocessed import PreProcessed
-from utilities import findBucketIndex
+from utilities import find_bucket_index
 import torch
 import numpy as np
 
@@ -43,7 +43,7 @@ class StockPredictorDataset(Dataset) :
         match self.dataset_type:
             case DatasetType.TRAIN:
                 if idx < self.current_dataset_bucket.train_index_start or idx > self.current_dataset_bucket.train_index_end:
-                    self.current_bucket_index = findBucketIndex(idx, DatasetType.TRAIN, self.sequences)
+                    self.current_bucket_index = find_bucket_index(idx, DatasetType.TRAIN, self.sequences)
                     self.current_dataset_bucket = self.sequences[self.current_bucket_index]
                     self.current_bucket_data = np.load(self.current_dataset_bucket.file)
                 index_in_bucket = idx - self.current_dataset_bucket.train_index_start;
@@ -52,7 +52,7 @@ class StockPredictorDataset(Dataset) :
                 return train_ip,train_op,
             case DatasetType.VALIDATE:
                 if idx < self.current_dataset_bucket.val_index_start or idx > self.current_dataset_bucket.val_index_end:
-                    self.current_bucket_index = findBucketIndex(idx, DatasetType.VALIDATE, self.sequences)
+                    self.current_bucket_index = find_bucket_index(idx, DatasetType.VALIDATE, self.sequences)
                     self.current_dataset_bucket = self.sequences[self.current_bucket_index]
                     self.current_bucket_data = np.load(self.current_dataset_bucket.file)
                 index_in_bucket = idx - self.current_dataset_bucket.val_index_start;
@@ -61,7 +61,7 @@ class StockPredictorDataset(Dataset) :
                 return val_ip,val_op,
             case DatasetType.TEST:
                 if idx < self.current_dataset_bucket.test_index_start or idx > self.current_dataset_bucket.test_index_end:
-                    self.current_bucket_index = findBucketIndex(idx, DatasetType.TEST, self.sequences)
+                    self.current_bucket_index = find_bucket_index(idx, DatasetType.TEST, self.sequences)
                     self.current_dataset_bucket = self.sequences[self.current_bucket_index]
                     self.current_bucket_data = np.load(self.current_dataset_bucket.file)
                 index_in_bucket = idx - self.current_dataset_bucket.test_index_start;

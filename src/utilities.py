@@ -11,6 +11,11 @@ import pandas as pd
 from preprocessed import PreProcessed, PreProcessedEncoder
 from datasettype import DatasetType
 
+def get_csv_directory(base_directory):
+    return os.path.join(base_directory, 'outputs')
+
+def get_cache_directory(base_directory):
+    return os.path.join(base_directory, 'cache')
 
 def convert_to_sequences(memory, days_prediction, data_sequence):
     x = []
@@ -29,7 +34,7 @@ def convert_to_sequences(memory, days_prediction, data_sequence):
         y.append(intermediate_y)
     return np.asarray(x), np.asarray(y)
 
-def findBucketIndex(idx, dataset_type:DatasetType, sequence):
+def find_bucket_index(idx, dataset_type:DatasetType, sequence):
     match dataset_type:
         case DatasetType.TRAIN:
             for i in range(0, len(sequence)):
@@ -47,9 +52,11 @@ def findBucketIndex(idx, dataset_type:DatasetType, sequence):
                     return i
             return len(sequence) - 1
 
-def populate_scaler(csv_directory, cache_directory):
+def populate_scaler(base_directory):
 
     jumbo_df = pd.DataFrame()
+    csv_directory = get_csv_directory(base_directory)
+    cache_directory = get_cache_directory(base_directory)
     for f in tqdm(os.listdir(csv_directory)):
         file = os.path.join(csv_directory, f)
         df = pd.read_csv(file, sep=',', index_col=False)
@@ -58,6 +65,13 @@ def populate_scaler(csv_directory, cache_directory):
     scaler.fit(jumbo_df)
     joblib.dump(scaler, os.path.join(cache_directory, "scaler.gz"))
 
+def load_scaler(base_directory):
+    cache_directory = get_cache_directory(base_directory)
+    file = os.path.join(cache_directory, "scaler.gz")
+    if not os.path.exists(file):
+        populate_scaler(base_directory)
+
+    return joblib.load(file)
 
 def load_data(directory, cache_directory, memory, train_perc, val_perc, device, forecast_days = [1, 7, 15]):
     rv = []
@@ -75,15 +89,14 @@ def load_data(directory, cache_directory, memory, train_perc, val_perc, device, 
     test_input_dataset = []
     test_output_dataset = []
     count = 1
-    train_data_size = 0
-    val_data_size = 0
-    test_data_size = 0
     train_index_start = 0
     val_index_start = 0
     test_index_start = 0
+    scaler = load_scaler(directory, cache_directory)
     for f in tqdm(os.listdir(directory)):
         file = os.path.join(directory, f)
-        df = pd.read_csv(file, sep=',', index_col=False)
+        original_df = pd.read_csv(file, sep=',', index_col=False)
+        df = scaler.transform(original_df)
         input,output = convert_to_sequences(memory, forecast_days, df.to_numpy())
         train_size = int(len(input) * train_perc);
         val_size = int(len(input) * val_perc);
@@ -107,9 +120,6 @@ def load_data(directory, cache_directory, memory, train_perc, val_perc, device, 
             train_index_start = train_index_start + train_data_size
             val_index_start = val_index_start + val_data_size
             test_index_start = test_index_start + test_data_size
-            train_data_size = 0
-            val_data_size = 0
-            test_data_size = 0
             count = count + 1
             train_input_dataset = []
             train_output_dataset = []

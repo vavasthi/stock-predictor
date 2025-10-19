@@ -1,9 +1,8 @@
 import torch
 import torch.nn as nn
-import pytorch_lightning as pl
 import numpy as np
 
-class PositionalEncoder(pl.LightningModule):
+class PositionalEncoder(nn.Module):
     """
     PyTorch Lightning module for positional encoding, suitable for transformer models.
     """

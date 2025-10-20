@@ -115,7 +115,6 @@ def load_data(base_directory, memory, train_perc, val_perc, device, forecast_day
         val_data_size = len(val_input_dataset)
         test_data_size = len(test_input_dataset)
         if (train_data_size > 20000):
-            print("Writing file of size ", train_data_size)
             outfile = os.path.join(cache_directory, 'preprocessed-{}.npz'.format(count))
             np.savez_compressed(outfile, train_input=np.asarray(train_input_dataset), train_output=np.asarray(train_output_dataset), val_input=np.asarray(val_input_dataset), val_output=np.asarray(val_output_dataset), test_input=np.asarray(test_input_dataset), test_output=np.asarray(test_output_dataset))
             rv.append(PreProcessed(train_index_start, val_index_start, test_index_start, train_index_start + train_data_size - 1, val_index_start + val_data_size - 1, test_index_start + test_data_size - 1, train_data_size, val_data_size, test_data_size, outfile))

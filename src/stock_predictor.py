@@ -37,7 +37,6 @@ class StockPredictor(pl.LightningModule):
         loss = 0
         if targets is not None:
             loss = self.criterion(outputs, targets)
-        print('Loss is ', loss)
         predictions = torch.argmax(outputs, dim=1)
         return outputs, loss
 

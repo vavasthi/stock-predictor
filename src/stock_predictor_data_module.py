@@ -6,17 +6,18 @@ from stock_predictor_dataset import StockPredictorDataset, DatasetType
 import os
 
 class StockPredictorDataModule(pl.LightningDataModule):
-    def __init__(self, base_directory, device, train_workers:int=19, val_workers:int=19, test_workers:int=1, train_batch_size: int = 512, val_batch_size:int = 64, test_batch_size:int = 32):
+    def __init__(self, base_directory, memory, device, train_workers:int=19, val_workers:int=19, test_workers:int=1, train_batch_size: int = 512, val_batch_size:int = 64, test_batch_size:int = 32):
         super().__init__()
         self.base_directory = base_directory
-        self.sequences = load_data(base_directory, 300, 0.70, 0.15, device)
+        self.sequences = load_data(base_directory, self.memory, 0.70, 0.15, device)
         self.train_workers = train_workers
         self.val_workers = val_workers
         self.test_workers = test_workers
         self.train_batch_size = train_batch_size
         self.val_batch_size = val_batch_size
         self.test_batch_size = test_batch_size
-        self.device = device;
+        this.memory = memory
+        self.device = device
 
     def __getstate__(self):
         self.sequences = None
@@ -24,7 +25,7 @@ class StockPredictorDataModule(pl.LightningDataModule):
 
     def __setstate__(self, d):
         self.__dict__ = d
-        self.sequences = load_data(self.base_directory, 150, 0.70, 0.15, self.device)
+        self.sequences = load_data(self.base_directory, self.memory, 0.70, 0.15, self.device)
 
     def setup(self, stage=None):
         print("Setting up data module...")

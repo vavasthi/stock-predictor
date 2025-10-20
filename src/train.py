@@ -40,6 +40,7 @@ def run(base_directory, accelerator, devices):
     model = StockPredictor(device).to(device)
     model = torch.compile(model)
     data_module = StockPredictorDataModule(base_directory=base_directory,
+                                           memory=150,
                                            device=device,
                                            train_workers=15,
                                            val_workers=15,

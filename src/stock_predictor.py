@@ -18,17 +18,17 @@ class StockPredictor(pl.LightningModule):
 
     def training_step(self, batch, batch_idx):
         outputs, loss = self.common_step(batch, batch_idx)
-        self.log('train_loss', loss)
+        self.log('train_loss', loss, prog_bar = True, logger = True, on_epoch=True, on_step=True)
         return loss
 
     def validation_step(self, batch, batch_idx):
         outputs, loss = self.common_step(batch, batch_idx)
-        self.log('val_loss', loss)
+        self.log('val_loss', loss, prog_bar = True, logger = True, on_epoch=True, on_step=True)
         return loss
 
     def test_step(self, batch, batch_idx):
         outputs, loss = self.common_step(batch, batch_idx)
-        self.log('test_loss', loss)
+        self.log('test_loss', loss, prog_bar = True, logger = True, on_epoch=True, on_step=True)
         return loss
 
     def common_step(self, batch, batch_idx):
@@ -37,6 +37,7 @@ class StockPredictor(pl.LightningModule):
         loss = 0
         if targets is not None:
             loss = self.criterion(outputs, targets)
+        print('Loss is ', loss)
         predictions = torch.argmax(outputs, dim=1)
         return outputs, loss
 

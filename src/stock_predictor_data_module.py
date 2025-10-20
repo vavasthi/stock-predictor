@@ -9,7 +9,7 @@ class StockPredictorDataModule(pl.LightningDataModule):
     def __init__(self, base_directory, device, train_workers:int=19, val_workers:int=19, test_workers:int=1, train_batch_size: int = 512, val_batch_size:int = 64, test_batch_size:int = 32):
         super().__init__()
         self.base_directory = base_directory
-        self.sequences = load_data(os.path.join(base_directory, 'outputs'), os.path.join(base_directory, 'cache'), 300, 0.70, 0.15, device)
+        self.sequences = load_data(base_directory, 300, 0.70, 0.15, device)
         self.train_workers = train_workers
         self.val_workers = val_workers
         self.test_workers = test_workers
@@ -24,7 +24,7 @@ class StockPredictorDataModule(pl.LightningDataModule):
 
     def __setstate__(self, d):
         self.__dict__ = d
-        self.sequences = load_data(os.path.join(self.base_directory, 'outputs'), os.path.join(self.base_directory, 'cache'), 300, 0.70, 0.15, self.device)
+        self.sequences = load_data(self.base_directory, 150, 0.70, 0.15, self.device)
 
     def setup(self, stage=None):
         print("Setting up data module...")

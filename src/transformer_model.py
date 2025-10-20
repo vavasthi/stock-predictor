@@ -6,7 +6,7 @@ class TransformerModel(nn.Module):
     """
     PyTorch Lightning module for a generic Transformer model.
     """
-    def __init__(self, input_dim=31, model_dim=512, num_heads=32, num_layers=3, output_dim=6, dropout=0.1):
+    def __init__(self, input_dim=31, model_dim=256, num_heads=16, num_layers=2, output_dim=6, dropout=0.1):
         super().__init__()
         self.model_dim = model_dim
         self.embedding = nn.Linear(input_dim, model_dim)

@@ -3,7 +3,7 @@ import json
 import joblib
 import numpy as np
 from sklearn.preprocessing import MinMaxScaler
-from torch.utils.data import random_split, DataLoader
+from torch.utils.data import random_split
 from tqdm import tqdm
 import os
 import pandas as pd
@@ -73,8 +73,9 @@ def load_scaler(base_directory):
 
     return joblib.load(file)
 
-def load_data(directory, cache_directory, memory, train_perc, val_perc, device, forecast_days = [1, 7, 15]):
+def load_data(base_directory, memory, train_perc, val_perc, device, forecast_days = [1, 7, 15]):
     rv = []
+    cache_directory = get_cache_directory(base_directory)
     cache_json_file = os.path.join(cache_directory, "preprocessed.json")
     if os.path.exists(cache_json_file):
         with open(cache_json_file, "r") as f :
@@ -92,11 +93,12 @@ def load_data(directory, cache_directory, memory, train_perc, val_perc, device, 
     train_index_start = 0
     val_index_start = 0
     test_index_start = 0
-    scaler = load_scaler(directory, cache_directory)
-    for f in tqdm(os.listdir(directory)):
-        file = os.path.join(directory, f)
+    scaler = load_scaler(base_directory)
+    csv_directory = get_csv_directory(base_directory)
+    for f in tqdm(os.listdir(csv_directory)):
+        file = os.path.join(csv_directory, f)
         original_df = pd.read_csv(file, sep=',', index_col=False)
-        df = scaler.transform(original_df)
+        df = pd.DataFrame(scaler.transform(original_df), index=original_df.index, columns=original_df.columns)
         input,output = convert_to_sequences(memory, forecast_days, df.to_numpy())
         train_size = int(len(input) * train_perc);
         val_size = int(len(input) * val_perc);

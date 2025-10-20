@@ -1,4 +1,7 @@
-from pytorch_lightning.callbacks import ModelCheckpoint
+from argparse import ArgumentParser
+
+from pytorch_lightning.callbacks import ModelCheckpoint,RichProgressBar
+
 from pytorch_lightning.loggers import TensorBoardLogger
 import pytorch_lightning as pl
 
@@ -10,7 +13,7 @@ from utilities import populate_scaler
 import os
 
 
-def run(base_directory):
+def run(base_directory, accelerator, devices):
     has_mps = torch.backends.mps.is_built()
     device = "mps" if has_mps else "cuda" if torch.cuda.is_available() else "cpu"
     print(f"Using device: {device}")
@@ -29,9 +32,13 @@ def run(base_directory):
     logger = TensorBoardLogger('lightning_logs',
                                name="stock_predictor")
 
-    trainer = pl.Trainer(logger=logger, callbacks=[checkpoint_callback], max_epochs=1)
+    trainer = pl.Trainer(logger=logger, accelerator=accelerator,
+                         callbacks=[checkpoint_callback, RichProgressBar()], max_epochs=1)
+    if devices != None:
+        trainer = pl.Trainer(logger=logger, accelerator=accelerator, devices=devices, callbacks=[checkpoint_callback, RichProgressBar()], max_epochs=1)
 
     model = StockPredictor(device).to(device)
+    model = torch.compile(model)
     data_module = StockPredictorDataModule(base_directory=base_directory,
                                            device=device,
                                            train_workers=15,
@@ -49,4 +56,8 @@ if __name__ ==  '__main__':
     mp.set_start_method('spawn', force=True)
 #    base_directory = "/data/datasets/stockPredictor"
     base_directory = "/data/datasets/stockPredictor"
-    run(base_directory)
+    parser = ArgumentParser()
+    parser.add_argument("--accelerator", default='gpu')
+    parser.add_argument("--devices", default=None)
+    args = parser.parse_args()
+    run(base_directory, args.accelerator, args.devices)

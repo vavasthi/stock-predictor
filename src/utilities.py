@@ -70,7 +70,6 @@ def load_scaler(base_directory):
     file = os.path.join(cache_directory, "scaler.gz")
     if not os.path.exists(file):
         populate_scaler(base_directory)
-
     return joblib.load(file)
 
 def load_data(base_directory, memory, train_perc, val_perc, device, forecast_days = [1, 7, 15]):

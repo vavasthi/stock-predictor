@@ -6,9 +6,9 @@ import torch
 import torch.nn as nn
 
 class StockPredictor(pl.LightningModule):
-    def __init__(self, device, learning_rate: float = 1e-4):
+    def __init__(self, input_dimension, device, learning_rate: float = 1e-4):
         super().__init__()
-        self.model = TransformerModel().to(device)
+        self.model = TransformerModel(input_dim=input_dimension).to(device)
         self.learning_rate = learning_rate
         self.criterion = nn.MSELoss()
 

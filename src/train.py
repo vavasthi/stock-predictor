@@ -18,7 +18,6 @@ def run(base_directory, accelerator, devices):
     device = "mps" if has_mps else "cuda" if torch.cuda.is_available() else "cpu"
     print(f"Using device: {device}")
     print("Populating scaler parameters...")
-    populate_scaler(base_directory)
 
     torch.set_float32_matmul_precision('medium')
     torch.backends.cudnn.conv.fp32_precision = 'tf32'
@@ -37,10 +36,10 @@ def run(base_directory, accelerator, devices):
     if devices != None:
         trainer = pl.Trainer(logger=logger, accelerator=accelerator, devices=devices, callbacks=[checkpoint_callback, RichProgressBar()], max_epochs=1)
 
-    model = StockPredictor(device).to(device)
+    model = StockPredictor(input_dimension=35, device=device).to(device)
     model = torch.compile(model)
     data_module = StockPredictorDataModule(base_directory=base_directory,
-                                           memory=150,
+                                           memory=275,
                                            device=device,
                                            train_workers=15,
                                            val_workers=15,

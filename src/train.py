@@ -34,7 +34,7 @@ def run(base_directory, accelerator, devices):
     trainer = pl.Trainer(logger=logger, accelerator=accelerator,
                          callbacks=[checkpoint_callback, RichProgressBar()], max_epochs=1)
     if devices != None:
-        trainer = pl.Trainer(logger=logger, accelerator=accelerator, devices=devices, callbacks=[checkpoint_callback, RichProgressBar()], max_epochs=1)
+        trainer = pl.Trainer(strategy="ddp", logger=logger, accelerator=accelerator, devices=devices, callbacks=[checkpoint_callback, RichProgressBar()], max_epochs=1)
 
     model = StockPredictor(input_dimension=35, device=device).to(device)
     model = torch.compile(model)
@@ -44,11 +44,12 @@ def run(base_directory, accelerator, devices):
                                            train_workers=15,
                                            val_workers=15,
                                            test_workers=1,
-                                           train_batch_size=128,
-                                           val_batch_size=128,
+                                           train_batch_size=512,
+                                           val_batch_size=512,
                                            test_batch_size=16)
     model.train()
-    trainer.fit(model, data_module)
+    trainer.fit_loop.max_epochs = 20
+    trainer.fit(model, data_module, ckpt_path=os.path.join(os.path.join(base_directory, 'checkpoints'), 'stock-predictor-checkpoint.ckpt'))
     trainer.save_checkpoint(os.path.join(os.path.join(base_directory, "checkpoints"), "stock-predictor-final.ckpt"))
 
 
